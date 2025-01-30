@@ -3,8 +3,6 @@ import { AppwriteErrorException } from "../../../lib/appwriteException.ts";
 import { HTTPException } from "hono/http-exception";
 import {
   ID,
-  ImageFormat,
-  ImageGravity,
   InputFile,
   Permission,
   Role,
@@ -22,7 +20,7 @@ image.post("/", async (c: Context) => {
   const path = c.req.path;
   const allCookies = getCookie(c, "secretJwt");
   if (!allCookies) {
-    throw new HTTPException(401, {
+    throw new HTTPException(404, {
       message: "Need Cookies JWT as auth",
       cause: "No Cookies detected",
     });
@@ -37,6 +35,7 @@ image.post("/", async (c: Context) => {
       [
         Permission.read(Role.any()),
         Permission.read(Role.label("admin")),
+        Permission.read(Role.guests()),
       ],
     );
     if (response) {
@@ -48,7 +47,7 @@ image.post("/", async (c: Context) => {
     }
   } catch (error) {
     const e = error as AppwriteErrorException;
-    console.error(`Error:S402 at ${method} ${path}`, error);
+    console.error(`Error:S401 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,
@@ -61,7 +60,7 @@ image.get("/:id", async (c: Context) => {
   const path = c.req.path;
   const allCookies = getCookie(c, "secretJwt");
   if (!allCookies) {
-    throw new HTTPException(401, {
+    throw new HTTPException(404, {
       message: "Need Cookies JWT as auth",
       cause: "No Cookies detected",
     });
@@ -77,7 +76,7 @@ image.get("/:id", async (c: Context) => {
     return c.body(preview);
   } catch (error) {
     const e = error as AppwriteErrorException;
-    console.error(`Error:S402 at ${method} ${path}`, error);
+    console.error(`Error:S401 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,

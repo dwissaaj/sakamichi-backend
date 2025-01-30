@@ -35,7 +35,7 @@ admin.post("/sign", async (c: Context) => {
         );
       } catch (error) {
         const e = error as AppwriteErrorException;
-        console.error(`Error:S402 at ${method} ${path}`, error);
+        console.error(`Error:S401 at ${method} ${path}`, error);
         throw new HTTPException(e.code, {
           message: `${e.message}`,
           cause: `${e.type}`,
@@ -45,7 +45,7 @@ admin.post("/sign", async (c: Context) => {
     return c.json("Success to create admin, you can login now");
   } catch (error) {
     const e = error as AppwriteErrorException;
-    console.error(`Error:S402 at ${method} ${path}`, error);
+    console.error(`Error:S401 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,
@@ -78,8 +78,8 @@ admin.post("/login", async (c: Context) => {
             secure: true,
             domain: "sakamichi.cloud",
             httpOnly: true,
-            maxAge: 3600, // 1 hour
-            expires: new Date(Date.now() + 3600 * 1000), // Expires in 1 hour
+            maxAge: 3600,
+            expires: new Date(Date.now() + 3600 * 1000),
             sameSite: "Strict",
           },
         );
@@ -91,7 +91,7 @@ admin.post("/login", async (c: Context) => {
     });
   } catch (error) {
     const e = error as AppwriteErrorException;
-    console.error(`Error:S402 at ${method} ${path}`, error);
+    console.error(`Error:S401 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,
