@@ -1,40 +1,40 @@
-import { Context, Hono } from 'hono'
-import { Users, ID, Account, } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
+import { Context, Hono } from "hono";
+import { Account, ID, Users } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { userClient } from "../../../lib/user.mod.ts";
 import { accountClient } from "../../../lib/account.mod.ts";
 import { HTTPException } from "hono/http-exception";
 import { AppwriteErrorException } from "../../../lib/appwriteException.ts";
+import { setSignedCookie } from "hono/cookie";
 interface AdminType {
-  userId: string
-  email: string
-  password: string
-  name: string
+  userId: string;
+  email: string;
+  password: string;
+  name: string;
 }
-const admin = new Hono()
-const users = new Users(userClient)
-const account = new Account(accountClient)
+const admin = new Hono();
+const users = new Users(userClient);
+const account = new Account(accountClient);
 
 admin.post("/sign", async (c: Context) => {
-  const data: AdminType = await c.req.json() 
-  const { email, password, name } = data
-  const method = c.req.method
-  const path = c.req.path
+  const data: AdminType = await c.req.json();
+  const { email, password, name } = data;
+  const method = c.req.method;
+  const path = c.req.path;
   try {
     const newAdmin = await account.create(
       ID.unique(),
       email,
       password,
       name,
-      
-    )
-    if(newAdmin) {
+    );
+    if (newAdmin) {
       try {
         await users.updateLabels(
           newAdmin.$id,
-          ['admin']
-        )
+          ["admin"],
+        );
       } catch (error) {
-        const e = error as AppwriteErrorException
+        const e = error as AppwriteErrorException;
         console.error(`Error:S402 at ${method} ${path}`, error);
         throw new HTTPException(e.code, {
           message: `${e.message}`,
@@ -42,41 +42,61 @@ admin.post("/sign", async (c: Context) => {
         });
       }
     }
-    return c.json("Success to create admin, you can login now")
+    return c.json("Success to create admin, you can login now");
   } catch (error) {
-    const e = error as AppwriteErrorException
+    const e = error as AppwriteErrorException;
     console.error(`Error:S402 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,
     });
   }
-})
+});
 
 admin.post("/login", async (c: Context) => {
-  const data = await c.req.json() 
-  const { email, password } = data
-  const method = c.req.method
-  const path = c.req.path
+  const data = await c.req.json();
+  const { email, password } = data;
+  const method = c.req.method;
+  const path = c.req.path;
   try {
     const response = await account.createEmailPasswordSession(
       email,
-      password
-    )
-    console.log(data)
-    console.log(response)
-    return c.json("Correct")
+      password,
+    );
+
+    if (response) {
+      const session = await users.createSession(response.userId);
+      const cookieSecret = session.secret;
+      if (cookieSecret) {
+        await setSignedCookie(
+          c,
+          "secretJwt",
+          cookieSecret,
+          Deno.env.get("COOKIES_SECRET") as string,
+          {
+            path: "/",
+            secure: true,
+            domain: "sakamichi.cloud",
+            httpOnly: true,
+            maxAge: 3600, // 1 hour
+            expires: new Date(Date.now() + 3600 * 1000), // Expires in 1 hour
+            sameSite: "Strict",
+          },
+        );
+      }
+    }
+
+    return c.json({
+      message: "Success at login secret will put at your browser",
+    });
   } catch (error) {
-    const e = error as AppwriteErrorException
+    const e = error as AppwriteErrorException;
     console.error(`Error:S402 at ${method} ${path}`, error);
     throw new HTTPException(e.code, {
       message: `${e.message}`,
       cause: `${e.type}`,
     });
   }
-})
+});
 
-export default admin
-
-
-
+export default admin;
