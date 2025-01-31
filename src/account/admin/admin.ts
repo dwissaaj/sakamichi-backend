@@ -1,7 +1,7 @@
 import { Context, Hono } from "hono";
 import { Account, ID, Users } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
-import { userClient } from "../../../lib/user.mod.ts";
-import { accountClient } from "../../../lib/account.mod.ts";
+import { userClient } from "../../../lib/admin/user.mod.ts";
+import { accountClient } from "../../../lib/public/account.mod.ts";
 import { HTTPException } from "hono/http-exception";
 import { AppwriteErrorException } from "../../../lib/appwriteException.ts";
 import { setSignedCookie } from "hono/cookie";
@@ -78,8 +78,8 @@ admin.post("/login", async (c: Context) => {
             secure: true,
             domain: "sakamichi.cloud",
             httpOnly: true,
-            maxAge: 3600,
-            expires: new Date(Date.now() + 3600 * 1000),
+            maxAge: 86400,
+            expires: new Date(Date.now() + 86400 * 1000),
             sameSite: "Strict",
           },
         );

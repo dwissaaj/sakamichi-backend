@@ -9,7 +9,7 @@ import {
   Storage,
 } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { getCookie } from "hono/cookie";
-import { createStorageClient } from "../../../lib/storage.mod.ts";
+import { createStorageClient } from "../../../lib/admin/storage.mod.ts";
 const image = new Hono();
 
 image.post("/", async (c: Context) => {
