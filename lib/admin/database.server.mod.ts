@@ -1,6 +1,6 @@
 import { Client } from "https://deno.land/x/appwrite/mod.ts";
 
-export const createDatabaseClient = (sessionToken: string): Client => {
+export const createDatabaseServer = (sessionToken: string): Client => {
   const client = new Client();
 
   client

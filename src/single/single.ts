@@ -10,10 +10,11 @@ import {
   Role,
 } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 HTTPException;
-import { createDatabaseClient } from "../../lib/admin/database.mod.ts";
+import { createDatabaseServer } from "../../lib/admin/database.server.mod.ts";
 import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
 
 import { getCookie } from "hono/cookie";
+import trivia from "./trivia/trivia.ts";
 const single = new Hono();
 const databasePublic = new Databases(databasePublicClient);
 single.get("/all", async (c: Context) => {
@@ -96,7 +97,7 @@ single.post("/add", async (c: Context) => {
     });
   }
   try {
-    const database = createDatabaseClient(allCookies);
+    const database = createDatabaseServer(allCookies);
     const databaseFunction = new Databases(database);
     const response = await databaseFunction.createDocument(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
@@ -132,7 +133,7 @@ single.patch("/update/:id", async (c: Context) => {
     });
   }
   try {
-    const database = createDatabaseClient(allCookies);
+    const database = createDatabaseServer(allCookies);
     const databaseFunction = new Databases(database);
     const response = await databaseFunction.updateDocument(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
@@ -167,7 +168,7 @@ single.delete("/remove/:id", async (c: Context) => {
     });
   }
   try {
-    const database = createDatabaseClient(allCookies);
+    const database = createDatabaseServer(allCookies);
     const databaseFunction = new Databases(database);
     await databaseFunction.deleteDocument(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
@@ -186,4 +187,5 @@ single.delete("/remove/:id", async (c: Context) => {
 });
 
 single.route("/image", image);
+single.route("/trivia", trivia)
 export default single;

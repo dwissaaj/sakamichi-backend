@@ -1,7 +1,7 @@
 import { Context, Hono } from "hono";
 import { Account, ID, Users } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { userClient } from "../../../lib/admin/user.mod.ts";
-import { accountClient } from "../../../lib/public/account.mod.ts";
+import { accountClient } from "../../../lib/public/account.public.mod.ts";
 import { HTTPException } from "hono/http-exception";
 import { AppwriteErrorException } from "../../../lib/appwriteException.ts";
 import { setSignedCookie } from "hono/cookie";
