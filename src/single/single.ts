@@ -15,6 +15,8 @@ import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
 
 import { getCookie } from "hono/cookie";
 import trivia from "./trivia/trivia.ts";
+import cover from "./covers/cover.ts";
+import position from "./position/position.ts";
 const single = new Hono();
 const databasePublic = new Databases(databasePublicClient);
 single.get("/all", async (c: Context) => {
@@ -187,5 +189,7 @@ single.delete("/remove/:id", async (c: Context) => {
 });
 
 single.route("/image", image);
-single.route("/trivia", trivia)
+single.route("/trivia", trivia);
+single.route("/cover", cover)
+single.route("/position", position)
 export default single;
