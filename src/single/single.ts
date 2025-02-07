@@ -190,6 +190,6 @@ single.delete("/remove/:id", async (c: Context) => {
 
 single.route("/image", image);
 single.route("/trivia", trivia);
-single.route("/cover", cover)
-single.route("/position", position)
+single.route("/cover", cover);
+single.route("/position", position);
 export default single;

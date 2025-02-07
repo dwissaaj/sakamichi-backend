@@ -68,7 +68,7 @@ admin.post("/login", async (c: Context) => {
       const session = await users.createSession(response.userId);
       const cookieSecret = session.secret;
       if (cookieSecret) {
-        console.log(cookieSecret)
+        console.log(cookieSecret);
         await setSignedCookie(
           c,
           "secretJwt",
@@ -86,7 +86,6 @@ admin.post("/login", async (c: Context) => {
         );
       }
     }
-    
 
     return c.json({
       message: "Success at login secret will put at your browser",

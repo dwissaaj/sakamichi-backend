@@ -4,37 +4,37 @@ import { HTTPException } from "hono/http-exception";
 import { createDatabaseServer } from "../../../lib/admin/database.server.mod.ts";
 import { getCookie } from "hono/cookie";
 import {
-    Databases,
-    ID,
-    Permission,
-    Query,
-    Role,
-  } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
+  Databases,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { databasePublicClient } from "../../../lib/public/database.public.mod.ts";
-const cover = new Hono()
+const cover = new Hono();
 const publicDatabase = new Databases(databasePublicClient);
 cover.get("/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const id = c.req.param("id")
-    try {
-      const result = await publicDatabase.listDocuments(
-        Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-        Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
-        [
-          Query.equal("singleId", id)
-        ]
-      )
-      return c.json({cover: result})
-    } catch (error) {
-      const e = error as AppwriteErrorException;
-      console.error(`Error:S401 at ${method} ${path}`, error);
-      throw new HTTPException(e.code, {
-        message: `${e.message}`,
-        cause: `${e.type}`,
-      });
-    }
-})
+  const id = c.req.param("id");
+  try {
+    const result = await publicDatabase.listDocuments(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
+      [
+        Query.equal("singleId", id),
+      ],
+    );
+    return c.json({ cover: result });
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
 cover.post("/add", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
@@ -70,7 +70,7 @@ cover.post("/add", async (c: Context) => {
   }
 });
 cover.patch("/update/:id", async (c: Context) => {
-  const id = c.req.param("id")
+  const id = c.req.param("id");
   const method = c.req.method;
   const path = c.req.path;
   const data = await c.req.json();
@@ -103,7 +103,7 @@ cover.patch("/update/:id", async (c: Context) => {
 cover.delete("/delete/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const id = c.req.param("id")
+  const id = c.req.param("id");
   const allCookies = getCookie(c, "secretJwt");
   if (!allCookies) {
     throw new HTTPException(404, {
@@ -118,7 +118,6 @@ cover.delete("/delete/:id", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
       Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
       id,
-     
     );
     return c.json({ status: 200, message: "Document deleted successfully" });
   } catch (error) {
@@ -130,4 +129,4 @@ cover.delete("/delete/:id", async (c: Context) => {
     });
   }
 });
-export default cover
+export default cover;

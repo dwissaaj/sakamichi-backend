@@ -1,17 +1,17 @@
 import { Context, Hono } from "hono";
-import { AppwriteErrorException } from "../../lib/appwriteException.ts"
+import { AppwriteErrorException } from "../../lib/appwriteException.ts";
 import { HTTPException } from "hono/http-exception";
-import { createDatabaseServer } from "../../lib/admin/database.server.mod.ts"
+import { createDatabaseServer } from "../../lib/admin/database.server.mod.ts";
 import { getCookie } from "hono/cookie";
 import {
-    Databases,
-    ID,
-    Permission,
-    Query,
-    Role,
-  } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
-  import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
-
+  Databases,
+  ID,
+  Permission,
+  Role,
+} from "https://deno.land/x/appwrite@12.2.0/mod.ts";
+import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
+import funfact from "../member/funfact/funfact.ts";
+import social from "./social/social.ts";
 const member = new Hono();
 const databasePublic = new Databases(databasePublicClient);
 member.get("/all", async (c: Context) => {
@@ -22,7 +22,7 @@ member.get("/all", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
       Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
     );
-    return c.json(data)
+    return c.json(data);
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -66,7 +66,7 @@ member.post("/add", async (c: Context) => {
       cause: `${e.type}`,
     });
   }
-})
+});
 member.patch("/update/:id", async (c: Context) => {
   const method = c.req.method;
   const id = c.req.param("id");
@@ -128,12 +128,9 @@ member.delete("/remove/:id", async (c: Context) => {
     });
   }
 });
-
+member.route("/funfact", funfact);
+member.route("/social", social);
 export default member;
-
-
-
-
 
 // member.get("/all", async (c: Context) => {
 //   const method = c.req.method;
@@ -155,8 +152,7 @@ export default member;
 //       console.log(url)
 //       return c.json(url);
 //     }
-   
-    
+
 //   } catch (error) {
 //     const e = error as AppwriteErrorException;
 //     console.error(`Error:S401 at ${method} ${path}`, error);

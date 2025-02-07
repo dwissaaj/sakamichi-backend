@@ -4,37 +4,37 @@ import { HTTPException } from "hono/http-exception";
 import { createDatabaseServer } from "../../../lib/admin/database.server.mod.ts";
 import { getCookie } from "hono/cookie";
 import {
-    Databases,
-    ID,
-    Permission,
-    Query,
-    Role,
-  } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
+  Databases,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { databasePublicClient } from "../../../lib/public/database.public.mod.ts";
-const trivia = new Hono()
+const trivia = new Hono();
 const publicDatabase = new Databases(databasePublicClient);
 trivia.get("/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const id = c.req.param("id")
-    try {
-      const result = await publicDatabase.listDocuments(
-        Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-        Deno.env.get("HONO_SINGLE_COLLECTION_TRIVIAS_ID") as string,
-        [
-          Query.equal("singleId", id)
-        ]
-      )
-      return c.json({trivia: result})
-    } catch (error) {
-      const e = error as AppwriteErrorException;
-      console.error(`Error:S401 at ${method} ${path}`, error);
-      throw new HTTPException(e.code, {
-        message: `${e.message}`,
-        cause: `${e.type}`,
-      });
-    }
-})
+  const id = c.req.param("id");
+  try {
+    const result = await publicDatabase.listDocuments(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_TRIVIAS_ID") as string,
+      [
+        Query.equal("singleId", id),
+      ],
+    );
+    return c.json({ trivia: result });
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
 trivia.post("/add", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
@@ -70,7 +70,7 @@ trivia.post("/add", async (c: Context) => {
   }
 });
 trivia.patch("/update/:id", async (c: Context) => {
-  const id = c.req.param("id")
+  const id = c.req.param("id");
   const method = c.req.method;
   const path = c.req.path;
   const data = await c.req.json();
@@ -103,7 +103,7 @@ trivia.patch("/update/:id", async (c: Context) => {
 trivia.delete("/delete/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const id = c.req.param("id")
+  const id = c.req.param("id");
   const allCookies = getCookie(c, "secretJwt");
   if (!allCookies) {
     throw new HTTPException(404, {
@@ -118,7 +118,6 @@ trivia.delete("/delete/:id", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
       Deno.env.get("HONO_SINGLE_COLLECTION_TRIVIAS_ID") as string,
       id,
-     
     );
     return c.json({ status: 200, message: "Document deleted successfully" });
   } catch (error) {
@@ -130,4 +129,4 @@ trivia.delete("/delete/:id", async (c: Context) => {
     });
   }
 });
-export default trivia
+export default trivia;

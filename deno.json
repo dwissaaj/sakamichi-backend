@@ -11,7 +11,7 @@
     "jsxImportSource": "hono/jsx"
   },
   "deploy": {
-    "project": "81f0df30-dcc7-4468-8596-995cc4ec3583",
+    "project": "d6dba6b1-4be3-405a-9373-f54d131818cd",
     "exclude": [
       "**/node_modules"
     ],
