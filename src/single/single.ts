@@ -19,6 +19,28 @@ import cover from "./covers/cover.ts";
 import position from "./position/position.ts";
 const single = new Hono();
 const databasePublic = new Databases(databasePublicClient);
+single.get("/partial", async (c) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  try {
+    const response = await databasePublic.listDocuments(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
+      [
+        Query.equal("numberCover", 1),
+      ],
+    );
+    return c.json(response);
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
+
 single.get("/all", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;

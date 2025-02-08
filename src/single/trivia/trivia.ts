@@ -11,6 +11,7 @@ import {
   Role,
 } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { databasePublicClient } from "../../../lib/public/database.public.mod.ts";
+
 const trivia = new Hono();
 const publicDatabase = new Databases(databasePublicClient);
 trivia.get("/:id", async (c: Context) => {
@@ -35,10 +36,12 @@ trivia.get("/:id", async (c: Context) => {
     });
   }
 });
-trivia.post("/add", async (c: Context) => {
+trivia.post("/add/:single", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const data = await c.req.json();
+  const single = c.req.param("single");
+  const { fact, number } = await c.req.json();
+
   const allCookies = getCookie(c, "secretJwt");
   if (!allCookies) {
     throw new HTTPException(404, {
@@ -53,7 +56,11 @@ trivia.post("/add", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
       Deno.env.get("HONO_SINGLE_COLLECTION_TRIVIAS_ID") as string,
       ID.unique(),
-      data,
+      {
+        fact: fact,
+        number: number,
+        singleId: single,
+      },
       [
         Permission.read(Role.any()),
         Permission.write(Role.label("admin")),
