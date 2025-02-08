@@ -41,7 +41,7 @@ image.post("/", async (c: Context) => {
     if (response) {
       const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
         Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID")
-      }/files/${response.$id}`;
+      }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
 
       return c.json({ "urlImage": `${urlImage}` });
     }

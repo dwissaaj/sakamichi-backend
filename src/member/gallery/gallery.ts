@@ -15,19 +15,17 @@ import {
 import { databasePublicClient } from "../../../lib/public/database.public.mod.ts";
 
 import { createStorageClient } from "../../../lib/admin/storage.mod.ts";
-import { UpdateCoverData } from "./covers.dto.ts";
-const cover = new Hono();
+const gallery = new Hono();
 const publicDatabase = new Databases(databasePublicClient);
-cover.get("/:id", async (c: Context) => {
+gallery.get("/partial", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
-  const id = c.req.param("id");
   try {
     const result = await publicDatabase.listDocuments(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-      Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
       [
-        Query.equal("singleId", id),
+        Query.equal("isProfile", true),
       ],
     );
     return c.json({ cover: result });
@@ -40,7 +38,29 @@ cover.get("/:id", async (c: Context) => {
     });
   }
 });
-cover.post("/add/:singleid", async (c: Context) => {
+gallery.get("/:id", async (c: Context) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  const id = c.req.param("id");
+  try {
+    const result = await publicDatabase.listDocuments(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
+      [
+        Query.equal("galleryOfMember", id),
+      ],
+    );
+    return c.json({ cover: result });
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
+gallery.post("/add/:memberid", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
   const allCookies = getCookie(c, "secretJwt");
@@ -48,10 +68,11 @@ cover.post("/add/:singleid", async (c: Context) => {
   // for image
   const formData = await c.req.formData();
   const name = formData.get("name") as string;
+  const isProfile = formData.get("isProfile") === "true";
   const file = formData.get("image") as File;
-  const numberCover = Number(formData.get("numberCover"));
-
-  const singleid = c.req.param("singleid");
+  const originalFileName = file.name;
+  const date = formData.get("date") as string;
+  const memberid = c.req.param("memberid");
   if (!allCookies) {
     throw new HTTPException(404, {
       message: "Error:S404 Need Cookies JWT as auth",
@@ -62,9 +83,9 @@ cover.post("/add/:singleid", async (c: Context) => {
     const storage = createStorageClient(allCookies);
     const storageFunction = new Storage(storage);
     const response = await storageFunction.createFile(
-      Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID") as string,
+      Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID") as string,
       ID.unique(),
-      await InputFile.fromBlob(file, name),
+      await InputFile.fromBlob(file, originalFileName),
       [
         Permission.read(Role.any()),
         Permission.write(Role.label("admin")),
@@ -72,27 +93,106 @@ cover.post("/add/:singleid", async (c: Context) => {
     );
     if (response) {
       const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID")
+        Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID")
       }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
-
       try {
         const database = createDatabaseServer(allCookies);
         const databaseFunction = new Databases(database);
-        const response = await databaseFunction.createDocument(
+        const createDocument = await databaseFunction.createDocument(
           Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-          Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
+          Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
           ID.unique(),
           {
             name: name,
             url: urlImage,
-            numberCover: numberCover,
-            singleId: singleid,
+            date: date,
+            isProfile: isProfile,
+            galleryOfMember: memberid,
           },
           [
             Permission.read(Role.any()),
             Permission.write(Role.label("admin")),
           ],
         );
+        if (isProfile === true) {
+          await databaseFunction.updateDocument(
+            Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+            Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
+            memberid,
+            {
+              profilePics: urlImage,
+            },
+          );
+        }
+        return c.json({ single: createDocument });
+      } catch (error) {
+        const e = error as AppwriteErrorException;
+        console.error(`Error:S401 at ${method} ${path}`, error);
+        throw new HTTPException(e.code, {
+          message: `${e.message}`,
+          cause: `${e.type}`,
+        });
+      }
+    }
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
+gallery.patch("/update/:galleryid", async (c: Context) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  const allCookies = getCookie(c, "secretJwt");
+
+  // for image
+  const formData = await c.req.formData();
+  const name = formData.get("name") as string;
+  const file = formData.get("image") as File;
+  const isProfile = formData.get("isProfile") === "true";
+  const originalFileName = file.name;
+  const date = formData.get("date") as string;
+  const galleryid = c.req.param("galleryid");
+  if (!allCookies) {
+    throw new HTTPException(404, {
+      message: "Error:S404 Need Cookies JWT as auth",
+      cause: "No Cookies detected please login first",
+    });
+  }
+  try {
+    const storage = createStorageClient(allCookies);
+    const storageFunction = new Storage(storage);
+    const response = await storageFunction.createFile(
+      Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID") as string,
+      ID.unique(),
+      await InputFile.fromBlob(file, originalFileName),
+      [
+        Permission.read(Role.any()),
+        Permission.write(Role.label("admin")),
+      ],
+    );
+    if (response) {
+      const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
+        Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID")
+      }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
+      try {
+        const database = createDatabaseServer(allCookies);
+        const databaseFunction = new Databases(database);
+        const response = await databaseFunction.updateDocument(
+          Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+          Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
+          galleryid,
+          {
+            name: name,
+            url: urlImage,
+            date: date,
+            isProfile: isProfile,
+          },
+        );
+
         return c.json({ single: response });
       } catch (error) {
         const e = error as AppwriteErrorException;
@@ -112,75 +212,7 @@ cover.post("/add/:singleid", async (c: Context) => {
     });
   }
 });
-cover.patch("/update/:coverId", async (c: Context) => {
-  const method = c.req.method;
-  const path = c.req.path;
-  const coverId = c.req.param("coverId");
-  const allCookies = getCookie(c, "secretJwt");
-
-  if (!allCookies) {
-    throw new HTTPException(404, {
-      message: "Error:S404 Need Cookies JWT as auth",
-      cause: "No Cookies detected, please log in first",
-    });
-  }
-
-  try {
-    const formData = await c.req.formData();
-    const name = formData.get("name") as string;
-    const numberCover = Number(formData.get("numberCover"));
-    const singleId = formData.get("singleId") as string;
-    const file = formData.get("image") as File | null; // Optional image
-
-    const database = createDatabaseServer(allCookies);
-    const databaseFunction = new Databases(database);
-
-    let urlImage = null;
-
-    if (file) {
-      // If a new image is provided, upload and get the new URL
-      const storage = createStorageClient(allCookies);
-      const storageFunction = new Storage(storage);
-      const response = await storageFunction.createFile(
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID") as string,
-        ID.unique(),
-        await InputFile.fromBlob(file, file.name),
-        [
-          Permission.read(Role.any()),
-          Permission.write(Role.label("admin")),
-        ],
-      );
-
-      urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID")
-      }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
-    }
-
-    const updateData: UpdateCoverData = { name, numberCover, singleId };
-    if (urlImage) {
-      updateData.url = urlImage; // Only update the image if a new one is uploaded
-    }
-
-    // Update the document
-    const updatedCover = await databaseFunction.updateDocument(
-      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-      Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
-      coverId,
-      updateData,
-    );
-
-    return c.json({ success: true, updatedCover });
-  } catch (error) {
-    const e = error as AppwriteErrorException;
-    console.error(`Error:S401 at ${method} ${path}`, error);
-    throw new HTTPException(e.code, {
-      message: `${e.message}`,
-      cause: `${e.type}`,
-    });
-  }
-});
-
-cover.delete("/delete/:id", async (c: Context) => {
+gallery.delete("/delete/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
   const id = c.req.param("id");
@@ -196,7 +228,7 @@ cover.delete("/delete/:id", async (c: Context) => {
     const databaseFunction = new Databases(database);
     await databaseFunction.deleteDocument(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-      Deno.env.get("HONO_SINGLE_COLLECTION_COVERS_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
       id,
     );
     return c.json({ status: 200, message: "Document deleted successfully" });
@@ -209,4 +241,4 @@ cover.delete("/delete/:id", async (c: Context) => {
     });
   }
 });
-export default cover;
+export default gallery;

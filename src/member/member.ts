@@ -11,6 +11,7 @@ import {
 } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
 import funfact from "../member/funfact/funfact.ts";
+import gallery from "../member/gallery/gallery.ts";
 import social from "./social/social.ts";
 const member = new Hono();
 const databasePublic = new Databases(databasePublicClient);
@@ -130,6 +131,7 @@ member.delete("/remove/:id", async (c: Context) => {
 });
 member.route("/funfact", funfact);
 member.route("/social", social);
+member.route("/gallery", gallery);
 export default member;
 
 // member.get("/all", async (c: Context) => {
