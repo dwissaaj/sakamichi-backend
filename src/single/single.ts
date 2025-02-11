@@ -1,5 +1,4 @@
 import { Context, Hono } from "hono";
-import image from "./image/image.ts";
 import { AppwriteErrorException } from "../../lib/appwriteException.ts";
 import { HTTPException } from "hono/http-exception";
 import {
@@ -210,7 +209,6 @@ single.delete("/remove/:id", async (c: Context) => {
   }
 });
 
-single.route("/image", image);
 single.route("/trivia", trivia);
 single.route("/cover", cover);
 single.route("/position", position);
