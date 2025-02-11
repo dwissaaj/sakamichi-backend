@@ -65,8 +65,8 @@ member.get("/all", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
       Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
       [
-        Query.select(["name"])
-      ]
+        Query.select(["name"]),
+      ],
     );
     return c.json(data);
   } catch (error) {

@@ -26,6 +26,7 @@ gallery.get("/partial", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
       [
         Query.equal("isProfile", true),
+        // Query.select(["name","galleryOfMember" ])
       ],
     );
     return c.json({ cover: result });
