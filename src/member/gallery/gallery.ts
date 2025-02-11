@@ -48,6 +48,15 @@ gallery.get("/:id", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
       [
         Query.equal("galleryOfMember", id),
+        Query.select([
+          "name",
+          "date",
+          "url",
+          "isProfile",
+          "$createdAt",
+          "$updatedAt",
+          "$id",
+        ]),
       ],
     );
     return c.json({ cover: result });

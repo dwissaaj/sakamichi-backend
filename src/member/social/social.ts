@@ -28,6 +28,16 @@ social.get("/:memberId", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_COLLECTION_SOCIALMEDIA_ID") as string,
       [
         Query.equal("member", memberId),
+        Query.select([
+          "instagram",
+          "website",
+          "showroom",
+          "blog",
+          "other",
+          "$id",
+          "$createdAt",
+          "$updatedAt",
+        ]),
       ],
     );
     return c.json({ trivia: result });

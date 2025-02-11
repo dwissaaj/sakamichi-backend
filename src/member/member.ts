@@ -7,6 +7,7 @@ import {
   Databases,
   ID,
   Permission,
+  Query,
   Role,
 } from "https://deno.land/x/appwrite@12.2.0/mod.ts";
 import { databasePublicClient } from "../../lib/public/database.public.mod.ts";
@@ -15,6 +16,47 @@ import gallery from "../member/gallery/gallery.ts";
 import social from "./social/social.ts";
 const member = new Hono();
 const databasePublic = new Databases(databasePublicClient);
+member.get("/get/:id", async (c: Context) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  const id = c.req.param("id");
+  try {
+    const data = await databasePublic.getDocument(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
+      id,
+      [
+        Query.select([
+          "name",
+          "birthdate",
+          "penlight",
+          "debut",
+          "graduate",
+          "bloodtype",
+          "agency",
+          "nameKana",
+          "nameKanji",
+          "generation",
+          "group",
+          "birthplace",
+          "height",
+          "nickname",
+          "$id",
+          "$createdAt",
+          "$updatedAt",
+        ]),
+      ],
+    );
+    return c.json(data);
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
 member.get("/all", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
@@ -133,34 +175,3 @@ member.route("/funfact", funfact);
 member.route("/social", social);
 member.route("/gallery", gallery);
 export default member;
-
-// member.get("/all", async (c: Context) => {
-//   const method = c.req.method;
-//   const path = c.req.path;
-//   try {
-//     const data = await databasePublic.listDocuments(
-//       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-//       Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
-//       [Query.select(["name", "nameKanji", "$id", ])]
-//     );
-//     if(data) {
-//       const url = await databasePublic.listDocuments(
-//         Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-//         Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
-//         [
-//           Query.equal("memberId",data.documents[0]["$id"] )
-//         ]
-//       )
-//       console.log(url)
-//       return c.json(url);
-//     }
-
-//   } catch (error) {
-//     const e = error as AppwriteErrorException;
-//     console.error(`Error:S401 at ${method} ${path}`, error);
-//     throw new HTTPException(e.code, {
-//       message: `${e.message}`,
-//       cause: `${e.type}`,
-//     });
-//   }
-// });

@@ -26,6 +26,13 @@ funfact.get("/:memberId", async (c: Context) => {
       Deno.env.get("HONO_SINGLE_COLLECTION_FUNFACT_ID") as string,
       [
         Query.equal("member", memberId),
+        Query.select([
+          "funfact",
+          "variety",
+          "$id",
+                "$createdAt",
+                "$updatedAt",
+        ])
       ],
     );
     return c.json({ trivia: result });
