@@ -4,7 +4,8 @@
   },
   "tasks": {
     "start": "deno run --allow-net main.ts",
-    "dev": "deno run --watch --allow-net --allow-env --env-file=.env.development ./src/main.ts"
+    "dev": "deno run --watch --allow-net --allow-env --env-file=.env.development ./src/main.ts",
+    "preview": "deno run --watch --allow-net --allow-env --env-file=.env.production ./src/main.ts"
   },
   "compilerOptions": {
     "jsx": "precompile",

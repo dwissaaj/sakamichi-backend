@@ -30,9 +30,9 @@ funfact.get("/:memberId", async (c: Context) => {
           "funfact",
           "variety",
           "$id",
-                "$createdAt",
-                "$updatedAt",
-        ])
+          "$createdAt",
+          "$updatedAt",
+        ]),
       ],
     );
     return c.json({ trivia: result });

@@ -45,7 +45,7 @@ gallery.get("/:id", async (c: Context) => {
   try {
     const result = await publicDatabase.listDocuments(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-      Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
+      Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
       [
         Query.equal("galleryOfMember", id),
         Query.select([
@@ -92,7 +92,7 @@ gallery.post("/add/:memberid", async (c: Context) => {
     const storage = createStorageClient(allCookies);
     const storageFunction = new Storage(storage);
     const response = await storageFunction.createFile(
-      Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID") as string,
+      Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
       ID.unique(),
       await InputFile.fromBlob(file, originalFileName),
       [
@@ -102,7 +102,7 @@ gallery.post("/add/:memberid", async (c: Context) => {
     );
     if (response) {
       const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID")
+        Deno.env.get("HONO_PRODUCTION_BUCKET_ID")
       }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
       try {
         const database = createDatabaseServer(allCookies);
@@ -175,7 +175,7 @@ gallery.patch("/update/:galleryid", async (c: Context) => {
     const storage = createStorageClient(allCookies);
     const storageFunction = new Storage(storage);
     const response = await storageFunction.createFile(
-      Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID") as string,
+      Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
       ID.unique(),
       await InputFile.fromBlob(file, originalFileName),
       [
@@ -185,7 +185,7 @@ gallery.patch("/update/:galleryid", async (c: Context) => {
     );
     if (response) {
       const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_MEMBER_BUCKET_ID")
+        Deno.env.get("HONO_PRODUCTION_BUCKET_ID")
       }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
       try {
         const database = createDatabaseServer(allCookies);

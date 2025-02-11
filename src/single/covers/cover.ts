@@ -50,7 +50,6 @@ cover.post("/add/:singleid", async (c: Context) => {
   const name = formData.get("name") as string;
   const file = formData.get("image") as File;
   const numberCover = Number(formData.get("numberCover"));
-
   const singleid = c.req.param("singleid");
   if (!allCookies) {
     throw new HTTPException(404, {
@@ -62,7 +61,7 @@ cover.post("/add/:singleid", async (c: Context) => {
     const storage = createStorageClient(allCookies);
     const storageFunction = new Storage(storage);
     const response = await storageFunction.createFile(
-      Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID") as string,
+      Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
       ID.unique(),
       await InputFile.fromBlob(file, name),
       [
@@ -72,7 +71,7 @@ cover.post("/add/:singleid", async (c: Context) => {
     );
     if (response) {
       const urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID")
+        Deno.env.get("HONO_PRODUCTION_BUCKET_ID")
       }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
 
       try {
@@ -142,7 +141,7 @@ cover.patch("/update/:coverId", async (c: Context) => {
       const storage = createStorageClient(allCookies);
       const storageFunction = new Storage(storage);
       const response = await storageFunction.createFile(
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID") as string,
+        Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
         ID.unique(),
         await InputFile.fromBlob(file, file.name),
         [
@@ -152,7 +151,7 @@ cover.patch("/update/:coverId", async (c: Context) => {
       );
 
       urlImage = `${Deno.env.get("HONO_API_ENDPOINT")}/storage/buckets/${
-        Deno.env.get("HONO_IMAGE_SINGLE_BUCKET_ID")
+        Deno.env.get("HONO_PRODUCTION_BUCKET_ID")
       }/files/${response.$id}/view?project=${Deno.env.get("HONO_PROJECT_ID")}`;
     }
 
