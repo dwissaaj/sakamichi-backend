@@ -40,7 +40,7 @@ social.get("/:memberId", async (c: Context) => {
         ]),
       ],
     );
-    return c.json({ trivia: result });
+    return c.json({ social: result });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -83,7 +83,7 @@ social.post("/add/:id", async (c: Context) => {
         Permission.write(Role.label("admin")),
       ],
     );
-    return c.json({ member: response });
+    return c.json({ social: response });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -114,7 +114,7 @@ social.patch("/update/:id", async (c: Context) => {
       id,
       data,
     );
-    return c.json({ member: response });
+    return c.json({ social: response });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
