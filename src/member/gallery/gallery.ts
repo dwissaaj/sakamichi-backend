@@ -47,7 +47,7 @@ gallery.get("/:id", async (c: Context) => {
   try {
     const result = await publicDatabase.listDocuments(
       Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
-      Deno.env.get("HONO_PRODUCTION_BUCKET_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_GALLERY_ID") as string,
       [
         Query.equal("galleryOfMember", id),
         Query.select([
@@ -61,7 +61,7 @@ gallery.get("/:id", async (c: Context) => {
         ]),
       ],
     );
-    return c.json({ cover: result });
+    return c.json({ gallery: result });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -135,7 +135,7 @@ gallery.post("/add/:memberid", async (c: Context) => {
             },
           );
         }
-        return c.json({ single: createDocument });
+        return c.json({ gallery: createDocument });
       } catch (error) {
         const e = error as AppwriteErrorException;
         console.error(`Error:S401 at ${method} ${path}`, error);
