@@ -28,10 +28,12 @@ member.get("/profile", async (c: Context) => {
           "name",
           "profilePic",
           "$id",
+          "group",
+
         ]),
       ],
     );
-    return c.json(data);
+    return c.json({profile : data});
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -69,6 +71,7 @@ member.get("/get/:id", async (c: Context) => {
           "$id",
           "$createdAt",
           "$updatedAt",
+          "profilePic"
         ]),
       ],
     );
