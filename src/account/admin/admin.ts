@@ -68,7 +68,6 @@ admin.post("/login", async (c: Context) => {
       const session = await users.createSession(response.userId);
       const cookieSecret = session.secret;
       if (cookieSecret) {
-        console.log(cookieSecret);
         await setSignedCookie(
           c,
           "secretJwt",

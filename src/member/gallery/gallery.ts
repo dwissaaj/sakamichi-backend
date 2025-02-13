@@ -131,7 +131,7 @@ gallery.post("/add/:memberid", async (c: Context) => {
             Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
             memberid,
             {
-              profilePics: urlImage,
+              profilePic: urlImage,
             },
           );
         }

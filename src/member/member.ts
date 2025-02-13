@@ -16,6 +16,31 @@ import gallery from "../member/gallery/gallery.ts";
 import social from "./social/social.ts";
 const member = new Hono();
 const databasePublic = new Databases(databasePublicClient);
+member.get("/profile", async (c: Context) => {
+  const method = c.req.method;
+  const path = c.req.path;
+  try {
+    const data = await databasePublic.listDocuments(
+      Deno.env.get("HONO_SINGLE_DATABASE_ID") as string,
+      Deno.env.get("HONO_SINGLE_COLLECTION_MEMBERS_ID") as string,
+      [
+        Query.select([
+          "name",
+          "profilePic",
+          "$id",
+        ]),
+      ],
+    );
+    return c.json(data);
+  } catch (error) {
+    const e = error as AppwriteErrorException;
+    console.error(`Error:S401 at ${method} ${path}`, error);
+    throw new HTTPException(e.code, {
+      message: `${e.message}`,
+      cause: `${e.type}`,
+    });
+  }
+});
 member.get("/get/:id", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
