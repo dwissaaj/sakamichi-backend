@@ -35,7 +35,7 @@ funfact.get("/:memberId", async (c: Context) => {
         ]),
       ],
     );
-    return c.json({ trivia: result });
+    return c.json({ funfact: result });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -74,7 +74,7 @@ funfact.post("/add/:id", async (c: Context) => {
         Permission.write(Role.label("admin")),
       ],
     );
-    return c.json({ member: response });
+    return c.json({ funfact: response });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);
@@ -105,7 +105,7 @@ funfact.patch("/update/:id", async (c: Context) => {
       id,
       data,
     );
-    return c.json({ member: response });
+    return c.json({ funfact: response });
   } catch (error) {
     const e = error as AppwriteErrorException;
     console.error(`Error:S401 at ${method} ${path}`, error);

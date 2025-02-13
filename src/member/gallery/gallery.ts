@@ -17,6 +17,7 @@ import { databasePublicClient } from "../../../lib/public/database.public.mod.ts
 import { createStorageClient } from "../../../lib/admin/storage.mod.ts";
 const gallery = new Hono();
 const publicDatabase = new Databases(databasePublicClient);
+
 gallery.get("/partial", async (c: Context) => {
   const method = c.req.method;
   const path = c.req.path;
